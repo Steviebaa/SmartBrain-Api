@@ -1,84 +1,40 @@
 const express = require('express');
 const cors = require('cors')
+const knex = require('knex')
+const bcrypt = require('bcryptjs')
+
+const register = require('./controllers/register')
+const signIn = require('./controllers/signIn')
+const profile = require('./controllers/profile')
+const image = require('./controllers/image')
+
+const db = knex({
+	client: 'pg',
+	connection: {
+		host: '127.0.0.1',
+		user: 'postgres',
+		password: 'test',
+		database: 'smartbrain',
+	}
+});
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const database = {
-	users: [
-		{
-			id: '123',
-			name: 'John',
-			email: 'john@gmail.com',
-			password: 'cookies',
-			entries: 0,
-			joined: new Date(),
-		},
-		{
-			id: '124',
-			name: 'Sally',
-			email: 'sally@gmail.com',
-			password: 'bananas',
-			entries: 0,
-			joined: new Date(),
-		},
-	]
-}
-
 // GET ROOT
-app.get('/', (req,res) => {
-	res.send(database.users);
-})
+app.get('/', (req,res) => {	res.send(database.users) })
 
 // POST SIGNIN
-app.post('/signin', (req,res) => {
-	if (req.body.email === database.users[0].email &&
-		req.body.password === database.users[0].password) {
-		res.json(database.users[0]);
-	} else{
-		res.status(400).json('failed');
-	}
-})
+app.post('/signin', signIn.handleSignIn(db, bcrypt))
 
 //POST REGISTER
-app.post('/register', (req,res) => {
-	const {email, name, password} = req.body;
-	database.users.push({
-		id: '125',
-		name: name,
-		email: email,
-		password: password,
-		entries: 0,
-		joined: new Date(),
-	})
-	res.json(database.users[database.users.length-1]);
-})
+app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
 
 // GET PROFILE:userid
-app.get('/profile/:id', (req,res) => {
-	const { id } = req.params;
-	
-	database.users.forEach(user => {
-		if (user.id === id) {
-			return res.json(user);
-		}
-	})
-	res.status(404).json('No such profile');
-})
+app.get('/profile/:id', (req,res) => {profile.handleProfile(req, res, db)})
 
 // PUT IMAGE
-app.put('/image', (req, res) => {
-	const { id } = req.body;
-	
-	database.users.forEach(user => {
-		if (user.id === id) {
-			user.entries++;
-			return res.json(user.entries);
-		}
-	})
-})
+app.put('/image', (req, res) => {image.handleImage(req, res, db)})
 
-app.listen(3001, ()=> {
-	console.log('app is running on port 3001');
-})
+app.listen(3001, () => { console.log('app is running on port 3001') })
