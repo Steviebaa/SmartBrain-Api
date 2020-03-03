@@ -22,6 +22,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// END POINTS
 // GET ROOT
 app.get('/', (req,res) => {	res.send(database.users) })
 
@@ -36,5 +37,8 @@ app.get('/profile/:id', (req,res) => {profile.handleProfile(req, res, db)})
 
 // PUT IMAGE
 app.put('/image', (req, res) => {image.handleImage(req, res, db)})
+
+// GET IMAGEURL
+app.post('/imageurl', (req, res) => {image.handleApiCall(req, res)})
 
 app.listen(3001, () => { console.log('app is running on port 3001') })
