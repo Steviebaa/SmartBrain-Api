@@ -24,7 +24,7 @@ app.use(cors());
 
 // END POINTS
 // GET ROOT
-app.get('/', (req,res) => {	res.send(database.users) })
+app.get('/', (req,res) => {	res.send('It is working!') })
 
 // POST SIGNIN
 app.post('/signin', signIn.handleSignIn(db, bcrypt))
